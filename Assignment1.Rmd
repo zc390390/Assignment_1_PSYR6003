@@ -1,0 +1,105 @@
+##Load Librarys Necessary
+```{R}
+library(dplyr)
+library(tidyr)
+library(pander)
+library(haven)
+library(effectsize)
+library(pwr)
+library(TOSTER)
+library(effectsize)
+```
+
+##Question 1
+#Utilizing the read.csv function, we can read the avengers csv into a dataframe. 
+#Then with na.omit, we can remove participants who have missing data anywhere. 
+```{R}
+df <- read.csv('avengers.csv')
+df <- na.omit(df)
+```
+
+
+##Question 2
+#We can simply add the four variable stogether with additional symbols, using the arrow to put the added variables into the new variable CombatEffectiveness
+#After that we can use dplyr to select our variables of interest with the new variable, ensuring it was added correctly.
+```{R}
+
+df$CombatEffectiveness <- df$agility + df$speed + df$strength + df$willpower
+dfselect <- df %>% select(CombatEffectiveness, speed, agility, strength, willpower)
+head(dfselect, 5) 
+```
+
+
+##Question 3
+#First we can use dplyrs filter method, with the arguments that the superpower variable must be no and died must be yes.
+#Using functions write.csv and write_sav from haven, we can create a csv and a sav file (sav is for spss).
+#Finally, to see whats going on in the dataset with these participants. We can group the dataset between north and south, which will then seperately give us information on the mean/SD/min/max of combat effectiveness, kills, and injuries. 
+#We then write it again. 
+```{R}
+dfsum <- df %>%
+  filter(superpower == 'no' & died == 'yes')
+write.csv(dfsum, 'CSVRAWdead&nosuperpower')
+write_sav(dfsum, 'SAVRAWdead&nosuperpower')
+
+dfsum1 <- dfsum %>%
+  group_by(north_south) %>%
+  summarize(meanCE = mean(CombatEffectiveness),
+            sdCE = sd(CombatEffectiveness), 
+            minCE = min(CombatEffectiveness),
+            maxCE = max(CombatEffectiveness),
+            meanKILL = mean(kills),
+            sdKILL = sd(kills),
+            minKILL = min(kills),
+            maxKILL = max(kills),
+            meanINJ = mean(injuries),
+            sdINJ = sd(injuries),
+            minINJ = min(injuries),
+            maxINJ = max(injuries))
+write.csv(dfsum1, 'CSVSUMdead&nosuperpower')
+write_sav(dfsum1, 'SAVSUMdead&nosuperpower')
+```
+
+
+
+##Question 4
+#Using t.test to see if there are statistically significant differences between 
+```{R}
+dfs1 <- dfsum %>%
+  filter(north_south == 'north')
+dfs2 <- dfsum %>%
+  filter(north_south == 'south')
+t.test(dfs1$CombatEffectiveness, dfs2$CombatEffectiveness)
+t.test(dfs1$injuries, dfs2$injuries)
+t.test(dfs1$kills, dfs2$kills)
+```
+
+#Question 6
+#
+```{R}
+dfq6a <- df %>%
+  filter(superpower == 'yes')
+dfq6b <- df %>%
+  filter(superpower == 'no')
+```
+
+#Question 7 and 8
+#Since we are doing the smallest effect size of interest, 0.2, then 
+```{R}
+pwr.t.test(d = 0.2, sig.level = 0.05, power = 0.8, alternative = c("two.sided"))
+```
+
+##Question 9 
+#
+```{R}
+powerTOSTtwo(alpha = 0.05, statistical_power = 0.8, low_eqbound_d = 0.2, high_eqbound_d = 0.2)
+```
+##Question 10
+#
+```{R}
+n1 <- length(dfq6a$iq)
+n2 <- length(dfq6b$iq)
+t = 4.25
+
+t_to_d(t, df_error = n1+n2-2, paired = FALSE)
+```
+
