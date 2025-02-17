@@ -26,7 +26,8 @@ df <- na.omit(df)
 
 df$CombatEffectiveness <- df$agility + df$speed + df$strength + df$willpower
 dfselect <- df %>% select(CombatEffectiveness, speed, agility, strength, willpower)
-head(dfselect, 5) 
+a <- head(dfselect, 5) 
+summary(a)
 ```
 
 
@@ -55,6 +56,7 @@ dfsum1 <- dfsum %>%
             sdINJ = sd(injuries),
             minINJ = min(injuries),
             maxINJ = max(injuries))
+pander(summary(dfsum1))
 write.csv(dfsum1, 'CSVSUMdead&nosuperpower')
 write_sav(dfsum1, 'SAVSUMdead&nosuperpower')
 ```
@@ -62,7 +64,7 @@ write_sav(dfsum1, 'SAVSUMdead&nosuperpower')
 
 
 ##Question 4
-#Using t.test to see if there are statistically significant differences between 
+#Using t.test to see if there are statistically significant differences between the north and south. 
 ```{R}
 dfs1 <- dfsum %>%
   filter(north_south == 'north')
@@ -74,7 +76,7 @@ t.test(dfs1$kills, dfs2$kills)
 ```
 
 #Question 6
-#
+#Using filter to get two different dataframes of those who do and dont have superpowers. 
 ```{R}
 dfq6a <- df %>%
   filter(superpower == 'yes')
@@ -83,18 +85,18 @@ dfq6b <- df %>%
 ```
 
 #Question 7 and 8
-#Since we are doing the smallest effect size of interest, 0.2, then 
+#Using pwr.t.test with the parameters from the paper to find how many participants we need at these parameters for significance. 
 ```{R}
-pwr.t.test(d = 0.2, sig.level = 0.05, power = 0.8, alternative = c("two.sided"))
+pwr.t.test(d = 0.2, sig.level = 0.05, power = 0.9, alternative = c("two.sided"))
 ```
 
 ##Question 9 
-#
+#Using powerTOSTtwo with the parameters from the paper to find how many participants we need at these parameters for nonsignifance.
 ```{R}
-powerTOSTtwo(alpha = 0.05, statistical_power = 0.8, low_eqbound_d = 0.2, high_eqbound_d = 0.2)
+powerTOSTtwo(alpha = 0.05, statistical_power = 0.9, low_eqbound_d = 0.2, high_eqbound_d = 0.2)
 ```
 ##Question 10
-#
+#Final test, using length to get the amount of participants for superpowers nad nonsuperpowers and then changing our t to d with the t_to_d function.
 ```{R}
 n1 <- length(dfq6a$iq)
 n2 <- length(dfq6b$iq)
